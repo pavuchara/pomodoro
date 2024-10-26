@@ -10,6 +10,19 @@ from user.exceptions import UserValidationException
 from user.utils import validate_user_email, validate_username
 
 
+class UserAuthSchema(BaseModel):
+    email: str = Field(max_length=256)
+    password: str = Field(max_length=50)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_field(cls, value: str, info: ValidationInfo):
+        try:
+            return validate_user_email(value)
+        except UserValidationException as e:
+            raise ValueError(str(e))
+
+
 class UserUpdateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,17 +40,8 @@ class UserUpdateSchema(BaseModel):
             raise ValueError(str(e))
 
 
-class UserCreateScema(UserUpdateSchema):
-    password: str = Field(max_length=50)
-    email: str = Field(max_length=256)
-
-    @field_validator("email")
-    @classmethod
-    def validate_email_field(cls, value: str, info: ValidationInfo):
-        try:
-            return validate_user_email(value)
-        except UserValidationException as e:
-            raise ValueError(str(e))
+class UserCreateScema(UserUpdateSchema, UserAuthSchema):
+    pass
 
 
 class UserRetrieveSchema(BaseModel):

@@ -57,3 +57,7 @@ class UserRepository:
             await self.db.refresh(user)
             return user
         raise UserDoesNotExistException()
+
+    async def get_user_by_email(self, email: str) -> User | None:
+        query = select(User).where(User.email == email)
+        return await self.db.scalar(query)
