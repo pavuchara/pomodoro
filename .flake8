@@ -8,5 +8,5 @@ exclude =
     data/
     venv/,
     env/,
-    infra/
     app/database/migrations/*
+    app/settings.py
