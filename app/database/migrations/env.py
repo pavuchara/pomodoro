@@ -14,6 +14,9 @@ from tasks.models import (
     Task,
     Category,
 )
+from user.models import (
+    User,
+)
 
 
 # this is the Alembic Config object, which provides
