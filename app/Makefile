@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 app_run:
-	uvicorn main:app --reload --env-file ../.env
+	uvicorn main:app --reload
 
 help: ## Show this help message
 	@echo "Usage: make [command]"

@@ -1,3 +1,4 @@
+from user.exceptions import UserDoesNotExistException
 from user.repositories import UserRepository
 from user.schemas import UserCreateScema, UserUpdateSchema
 
@@ -11,7 +12,9 @@ class UserService:
         return await self.user_repository.get_all_users()
 
     async def get_user_by_id(self, user_id: int):
-        return await self.user_repository.get_user_by_id(user_id)
+        if user := await self.user_repository.get_user_by_id(user_id):
+            return user
+        raise UserDoesNotExistException()
 
     async def create_user(self, user_data: UserCreateScema):
         return await self.user_repository.create_user(user_data)

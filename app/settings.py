@@ -1,10 +1,12 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
 
 SECRET_KEY: str = os.getenv("SECRET_KEY", "random_key")
 ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_LIFETIME = timedelta(minutes=30)
 
 
 POSTGRES_DB: str = os.getenv("POSTGRES_DB", "test")

@@ -12,13 +12,7 @@ class AbstractException(BaseException, ABC):
         raise NotImplementedError
 
 
-class UserValidationException(AbstractException):
+class AuthUserException(AbstractException):
 
     def __str__(self) -> str:
-        return self.text_error if self.text_error else "User validation error."
-
-
-class UserDoesNotExistException(AbstractException):
-
-    def __str__(self) -> str:
-        return self.text_error if self.text_error else "Пользователя не существут."
+        return self.text_error if self.text_error else "Could not validate credentials."
