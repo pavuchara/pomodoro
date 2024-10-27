@@ -20,16 +20,28 @@ class Task(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(255))
     pomodoro_count: Mapped[int] = mapped_column(Integer)
+    author_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+    )
     category_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("categories.id", ondelete="CASCADE"),
         index=True,
     )
     # Relationships:
+    author = relationship(
+        "User",
+        back_populates="tasks",
+        passive_deletes=True,
+        lazy="joined",
+    )
     category = relationship(
         "Category",
         back_populates="tasks",
         passive_deletes=True,
+        lazy="joined",
     )
 
     @validates("pomodoro_count")

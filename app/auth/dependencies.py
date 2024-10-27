@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -19,5 +19,5 @@ async def get_auth_service(
 async def get_user_token_data(
     token: Annotated[str, Depends(oauth2_scheme)],
     auth_service: Annotated[AuthServise, Depends(get_auth_service)],
-):
+) -> dict[str, Any]:
     return await auth_service.decode_token(token)

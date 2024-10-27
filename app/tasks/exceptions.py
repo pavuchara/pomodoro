@@ -15,4 +15,16 @@ class AbstractException(BaseException, ABC):
 class TaskValidationException(AbstractException):
 
     def __str__(self) -> str:
-        return self.text_error if self.text_error else "Task validation error."
+        return self.text_error if self.text_error else "Неверные данные при создании задачи"
+
+
+class TaskDoesnotExistsException(AbstractException):
+
+    def __str__(self) -> str:
+        return self.text_error if self.text_error else "Такой задачи не существует"
+
+
+class TaskOnlyAuthorException(AbstractException):
+
+    def __str__(self) -> str:
+        return self.text_error if self.text_error else "Только для автора"
