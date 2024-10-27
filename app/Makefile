@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-app_run:
+run:
 	uvicorn main:app --reload
 
 help: ## Show this help message

@@ -7,6 +7,7 @@ from sqlalchemy.orm import (
     Mapped,
     validates,
     mapped_column,
+    relationship,
 )
 
 from user.utils import (
@@ -28,7 +29,10 @@ class User(Base):
     bio: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     # Relationships:
-    # TODO realize
+    tasks = relationship(
+        "Task",
+        back_populates="author",
+    )
 
     @validates("email")
     def validate_email(self, _, value):

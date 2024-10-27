@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import (
     APIRouter,
@@ -10,10 +10,15 @@ from fastapi import (
 )
 from sqlalchemy.exc import IntegrityError
 
+from auth.dependencies import get_user_token_data
 from tasks.services import TaskService
 from tasks.dependencies import (
     get_category_repository,
     get_tasks_servise,
+)
+from tasks.exceptions import (
+    TaskDoesnotExistsException,
+    TaskOnlyAuthorException,
 )
 from tasks.repositories.db_query_repositories import (
     CategoryRepository,
@@ -43,9 +48,11 @@ async def get_all_tasks(
 async def create_task(
     task_data: TaskCreateSchema,
     task_service: Annotated[TaskService, Depends(get_tasks_servise)],
+    current_user_data: Annotated[dict, Depends(get_user_token_data)]
 ):
     try:
-        task = await task_service.create_task(task_data)
+        user_id: int = current_user_data["id"]
+        task = await task_service.create_task(task_data, user_id)
         return task
     except IntegrityError:
         raise HTTPException(
@@ -110,22 +117,35 @@ async def get_task(
     task_id: Annotated[int, Path()],
     task_service: Annotated[TaskService, Depends(get_tasks_servise)],
 ):
-    task = await task_service.get_task(task_id)
-    if task:
-        return task
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Такого рецепта нет",
-    )
+    try:
+        return await task_service.get_task(task_id)
+    except TaskDoesnotExistsException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
     task_id: Annotated[int, Path()],
     task_service: Annotated[TaskService, Depends(get_tasks_servise)],
+    current_user_data: Annotated[dict[str, Any], Depends(get_user_token_data)],
 ):
-    await task_service.delete_task(task_id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    try:
+        user_id: int = current_user_data["id"]
+        await task_service.delete_task(task_id, user_id)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except TaskOnlyAuthorException as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(e),
+        )
+    except TaskDoesnotExistsException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
 
 
 @router.put("/{task_id}", status_code=status.HTTP_200_OK, response_model=TaskRetrieveSchema)
@@ -133,10 +153,19 @@ async def update_task(
     task_id: Annotated[int, Path()],
     task_data: TaskCreateSchema,
     task_service: Annotated[TaskService, Depends(get_tasks_servise)],
+    current_user_data: Annotated[dict[str, Any], Depends(get_user_token_data)],
 ):
-    if task := await task_service.update_task(task_id, task_data):
+    try:
+        user_id: int = current_user_data["id"]
+        task = await task_service.update_task(task_id, task_data, user_id)
         return task
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Такой задачи нет",
-    )
+    except TaskOnlyAuthorException as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(e),
+        )
+    except TaskDoesnotExistsException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )

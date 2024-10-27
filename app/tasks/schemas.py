@@ -4,6 +4,8 @@ from pydantic import (
     Field,
 )
 
+from user.schemas import UserRetrieveSchema
+
 
 class CategoryCreateSchema(BaseModel):
     name: str = Field(max_length=255)
@@ -23,6 +25,7 @@ class TaskRetrieveSchema(BaseModel):
     name: str
     pomodoro_count: int
     category: CategoryRetrieveSchema
+    author: UserRetrieveSchema
 
 
 class TaskCreateSchema(BaseModel):

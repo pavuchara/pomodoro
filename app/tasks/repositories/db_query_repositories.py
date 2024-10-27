@@ -1,7 +1,6 @@
 from typing import Sequence
 
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.utils import get_object_or_404
@@ -11,7 +10,6 @@ from tasks.models import (
 )
 from tasks.schemas import (
     TaskCreateSchema,
-    TaskRetrieveSchema,
     CategoryCreateSchema,
 )
 
@@ -22,12 +20,7 @@ class TaskRepository:
         self.db = db
 
     async def get_all_tasks(self) -> Sequence[Task]:
-        query = (
-            select(Task)
-            .options(
-                joinedload(Task.category)
-            )
-        )
+        query = select(Task)
         all_tasks = await self.db.scalars(query)
         return all_tasks.all()
 
@@ -35,36 +28,29 @@ class TaskRepository:
         query = (
             select(Task)
             .where(Task.id == task_id)
-            .options(
-                joinedload(Task.category)
-            )
         )
         task = await self.db.scalar(query)
         return task
 
-    async def create_task(self, task_data: TaskCreateSchema) -> Task:
+    async def create_task(self, task_data: TaskCreateSchema, user_id: int) -> Task:
         category = await get_object_or_404(self.db, Category, Category.id == task_data.category_id)
         task = Task(
             name=task_data.name,
             pomodoro_count=task_data.pomodoro_count,
             category_id=category.id,
+            author_id=user_id,
         )
         self.db.add(task)
         await self.db.commit()
         await self.db.refresh(task)
         return task
 
-    async def delete_task(self, task_id: int) -> None:
-        task = get_object_or_404(self.db, Task, Task.id == task_id)
-        if task:
-            await self.db.delete(task)
-            await self.db.commit()
+    async def delete_task(self, task: Task) -> None:
+        await self.db.delete(task)
+        await self.db.commit()
 
-    async def update_task(self, task_id: int, task_data: TaskCreateSchema) -> Task | None:
-        task = await self.get_task_by_id(task_id)
+    async def update_task(self, task: Task, task_data: TaskCreateSchema) -> Task:
         category = await get_object_or_404(self.db, Category, Category.id == task_data.category_id)
-        if not task:
-            return None
         task.name = task_data.name
         task.pomodoro_count = task_data.pomodoro_count
         task.category_id = category.id
@@ -72,19 +58,6 @@ class TaskRepository:
         await self.db.commit()
         await self.db.refresh(task)
         return task
-
-    # TODO -> to service
-    async def to_schema(
-        self,
-        joinloaded_objects: Sequence[Task] | Task,
-        many: bool = False,
-    ):
-        if many:
-            return [
-                TaskRetrieveSchema.model_validate(task)
-                for task in joinloaded_objects  # type:ignore
-            ]
-        return TaskRetrieveSchema.model_validate(joinloaded_objects)
 
 
 class CategoryRepository:
