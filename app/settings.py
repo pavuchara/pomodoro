@@ -26,9 +26,10 @@ TEST_POSTGRES_HOST: str = os.getenv("TEST_POSTGRES_HOST", "localhost")
 TEST_POSTGRES_PORT: str = os.getenv("TEST_POSTGRES_PORT", "5433")
 
 
-TESTING: bool = os.getenv("TESTING", "False") == "True"
+# This valiable from `pytest.ini`
+TESTING_MODE: bool = os.getenv("TESTING_MODE", "False") == "True"
 
-if TESTING:
+if TESTING_MODE:
     # Test database into Docker
     # in main directory:
     # `docker compose docker-compose.test.yml up -d`
