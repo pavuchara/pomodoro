@@ -36,6 +36,7 @@ async def test_correct_user_creation(
 
     user = await user_repository.create_user(user_data)
     new_user = await user_repository.get_user_by_id(user.id)
+    assert new_user is not None
     assert new_user.email == user_data.email
     assert new_user.username == user_data.username
     assert new_user.first_name == user_data.first_name
@@ -52,6 +53,7 @@ async def test_correct_user_update(
 
     old_user = await user_repository.create_user(correct_user_data_schema_create)
     new_user = await user_repository.update_user(old_user.id, new_user_data)
+    assert new_user is not None
     assert new_user.username == new_user_data.username
     assert new_user.first_name == new_user_data.first_name
     assert new_user.last_name == new_user_data.last_name
