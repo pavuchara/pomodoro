@@ -1,6 +1,6 @@
 from typing import AsyncGenerator
 
-import redis.asyncio as redis
+from redis.asyncio import Redis
 
 from settings import (
     REDIS_HOST,
@@ -8,8 +8,8 @@ from settings import (
 )
 
 
-async def get_cache_session() -> AsyncGenerator[redis.Redis, None]:
-    cache_session = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+async def get_cache_session() -> AsyncGenerator[Redis, None]:
+    cache_session = Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
     try:
         yield cache_session
     finally:

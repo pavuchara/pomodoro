@@ -1,0 +1,37 @@
+volumes:
+  pg_data:
+  cache:
+
+services:
+
+  db:
+    image: postgres:15
+    container_name: pomodoro_db
+    env_file: .env.containers
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./app/
+    container_name: pomodoro_backend
+    command: bash /app/startup.sh
+    env_file: .env.containers
+    depends_on:
+      - db
+
+  gateway:
+    build: ./nginx/
+    container_name: pomodoro_nginx
+    env_file: .env.containers
+    ports:
+      - 8000:80
+    depends_on:
+      - backend
+
+  cache:
+    image: redis:7.4.1
+    container_name: pomodoro_cache
+    command: redis-server
+    restart: always
+    volumes:
+      - cache:/data

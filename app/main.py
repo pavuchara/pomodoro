@@ -5,7 +5,9 @@ from core import routes as core_routes
 from tasks import routes as task_routes
 from user import routes as user_routes
 
-app = FastAPI()
+app = FastAPI(
+    root_path="/api",
+)
 
 
 app.include_router(auth_routes.router)
