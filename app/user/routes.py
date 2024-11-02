@@ -51,6 +51,15 @@ async def get_current_user(
         )
 
 
+# TODO delete rabbit test rout
+@router.get("/send_email", status_code=status.HTTP_200_OK)
+async def send_email(
+    user_service: Annotated[UserService, Depends(get_user_service)],
+):
+    await user_service.send_email(to="example@example", email_text="Hi!", subject="subject")
+    return {"message": "OK"}
+
+
 @router.get("/{user_id}", response_model=UserRetrieveSchema, status_code=status.HTTP_200_OK)
 async def get_user_by_id(
     user_id: Annotated[int, Path()],

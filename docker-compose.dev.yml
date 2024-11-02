@@ -1,15 +1,9 @@
 volumes:
   pg_data:
   cache:
+  rabbitmq-data:
 
 services:
-
-  db:
-    image: postgres:15
-    container_name: pomodoro_db
-    env_file: .env.containers
-    volumes:
-      - pg_data:/var/lib/postgresql/data
 
   backend:
     build: ./app/
@@ -18,6 +12,15 @@ services:
     env_file: .env.containers
     depends_on:
       - db
+      - cache
+      - rabbitmq
+
+  db:
+    image: postgres:15
+    container_name: pomodoro_db
+    env_file: .env.containers
+    volumes:
+      - pg_data:/var/lib/postgresql/data
 
   gateway:
     build: ./nginx/
@@ -35,3 +38,13 @@ services:
     restart: always
     volumes:
       - cache:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: pomodoro_rabbitmq
+    env_file: .env.containers
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
