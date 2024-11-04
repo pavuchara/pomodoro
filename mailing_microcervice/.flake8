@@ -1,0 +1,12 @@
+[flake8]
+max-line-length = 100
+
+ignore =
+    W503
+exclude =
+    tests/,
+    data/
+    venv/,
+    env/,
+    app/database/migrations/*
+    app/settings.py

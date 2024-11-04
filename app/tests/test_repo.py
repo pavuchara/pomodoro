@@ -59,3 +59,6 @@ async def test_correct_user_update(
     assert new_user.last_name == new_user_data.last_name
     assert old_user.email == new_user.email
     assert old_user.password == new_user.password
+
+
+# TODO Another tests
