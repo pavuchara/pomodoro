@@ -19,6 +19,16 @@ services:
       rabbitmq:
         condition: service_started
 
+  mailing_microcervice:
+    build: ./mailing_microcervice/app/
+    container_name: pomodoro_mailing_microcervice
+    command: bash /mailing_microcervice/startup.sh
+    env_file: ./mailing_microcervice/.env
+    restart: always
+    depends_on:
+      backend:
+        condition: service_started
+
   db:
     image: postgres:15
     container_name: pomodoro_db
