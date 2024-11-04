@@ -16,7 +16,10 @@ class MailService:
     async def send_email(self, to: str, email_text: str, subject: str) -> None:
         message: aio_pika.Message = await self._prepare_message(to, email_text, subject)
         async with self.amqp_connector as connector:
-            await connector.channel.declare_queue(name=self.EMAIL_ROUTING_KEY)
+            await connector.channel.declare_queue(
+                name=self.EMAIL_ROUTING_KEY,
+                durable=True,
+            )
             await connector.channel.default_exchange.publish(
                 message=message,
                 routing_key=self.EMAIL_ROUTING_KEY,
@@ -31,6 +34,7 @@ class MailService:
         message = aio_pika.Message(
             body=json.dumps(email_body).encode(),
             correlation_id=str(uuid.uuid4()),
+            delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
         )
         return message
 
