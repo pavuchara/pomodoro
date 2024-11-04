@@ -10,10 +10,14 @@ services:
     container_name: pomodoro_backend
     command: bash /app/startup.sh
     env_file: .env.containers
+    restart: always
     depends_on:
-      - db
-      - cache
-      - rabbitmq
+      db:
+        condition: service_started
+      cache:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
 
   db:
     image: postgres:15
@@ -29,7 +33,8 @@ services:
     ports:
       - 8000:80
     depends_on:
-      - backend
+      backend:
+        condition: service_started
 
   cache:
     image: redis:7.4.1
